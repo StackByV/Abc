@@ -1,0 +1,270 @@
+import {
+  createContext,
+  type ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+
+export type Theme = "light" | "dark";
+
+type ThemeContextType = {
+  theme: Theme;
+  toggleTheme: () => void;
+};
+
+const ThemeContext = createContext<ThemeContextType | null>(null);
+
+const THEME_STORAGE_KEY = "rms-theme";
+
+export const ThemeProvider = ({ children }: { children: ReactNode }) => {
+  const [theme, setTheme] = useState<Theme>(() => {
+    const stored = localStorage.getItem(THEME_STORAGE_KEY);
+    if (stored === "light" || stored === "dark") {
+      return stored;
+    }
+    return "light";
+  });
+
+  useEffect(() => {
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+  };
+
+  return (
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+};
+
+export const useTheme = () => {
+  const ctx = useContext(ThemeContext);
+  if (!ctx) throw new Error("useTheme must be used inside ThemeProvider");
+  return ctx;
+};
+
+
+
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* =============================================================================
+   DESIGN TOKENS - Single Source of Truth
+============================================================================= */
+
+@theme {
+  /* Bajaj Broking Brand Colors */
+  --color-primary: #005DAC;
+  --color-navy: #002953;
+  --color-yellow: #FFA300;
+  --color-cta: #FF5500;
+  --color-success: #00B55E;
+  --color-error: #FF0000;
+
+  /* Typography */
+  --font-sans: "Rubik", sans-serif;
+
+  /* Layout Dimensions */
+  --layout-sidebar-width: 220px;
+  --layout-sidebar-collapsed: 56px;
+  --layout-content-padding: 24px;
+
+  /* Z-index Layers */
+  --z-base: 1;
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+}
+
+/* =============================================================================
+   LIGHT THEME
+============================================================================= */
+
+:root[data-theme="light"] {
+  /* Backgrounds */
+  --color-bg-base: #FFFFFF;
+  --color-bg-secondary: #F2F2F2;
+  --color-bg-elevated: #FBFDFF;
+
+  /* Legacy aliases for backward compatibility */
+  --color-bg: var(--color-bg-base);
+  --color-surface: var(--color-bg-base);
+
+  /* Text */
+  --color-text-primary: #1A1A1A;
+  --color-text-secondary: #4A4A4A;
+  --color-text-tertiary: #666666;
+  --color-text-quaternary: #999999;
+
+  /* Legacy aliases */
+  --color-text: var(--color-text-primary);
+
+  /* Borders */
+  --color-border-primary: #E5E5E5;
+  --color-border-secondary: #F2F2F2;
+
+  /* Legacy alias */
+  --color-border: var(--color-border-primary);
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  /* Legacy alias */
+  --shadow-header: var(--shadow-md);
+}
+
+/* =============================================================================
+   DARK THEME
+============================================================================= */
+
+:root[data-theme="dark"] {
+  /* Backgrounds */
+  --color-bg-base: #1A1A1A;
+  --color-bg-secondary: #242424;
+  --color-bg-elevated: #2A2A2A;
+
+  /* Legacy aliases */
+  --color-bg: var(--color-bg-base);
+  --color-surface: var(--color-bg-base);
+
+  /* Text */
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #CCCCCC;
+  --color-text-tertiary: #999999;
+  --color-text-quaternary: #666666;
+
+  /* Legacy alias */
+  --color-text: var(--color-text-primary);
+
+  /* Borders */
+  --color-border-primary: #333333;
+  --color-border-secondary: #2A2A2A;
+
+  /* Legacy alias */
+  --color-border: var(--color-border-primary);
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+
+  /* Legacy alias */
+  --shadow-header: var(--shadow-md);
+}
+
+/* =============================================================================
+   BASE STYLES
+============================================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans);
+  background-color: var(--color-bg-base);
+  color: var(--color-text-primary);
+  cursor: default;
+}
+
+/* =============================================================================
+   GENERIC ELEMENTS
+============================================================================= */
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+a:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--color-border-primary);
+  margin: 1rem 0;
+}
+
+/* =============================================================================
+   AG GRID THEME INTEGRATION
+============================================================================= */
+
+.ag-theme-alpine,
+.ag-theme-alpine-dark {
+  --ag-background-color: var(--color-bg-base);
+  --ag-foreground-color: var(--color-text-primary);
+  --ag-border-color: var(--color-border-primary);
+  --ag-header-background-color: var(--color-bg-secondary);
+  --ag-header-foreground-color: var(--color-text-primary);
+  --ag-row-hover-color: rgba(38, 92, 166, 0.08);
+  --ag-selected-row-background-color: rgba(38, 92, 166, 0.12);
+}
+
+/* Header text wrapping */
+.ag-header-cell-text {
+  max-height: 40px !important;
+  overflow: hidden;
+  white-space: normal !important;
+  line-height: 1.3;
+  color: white;
+}
+.ag-icon, .ag-icon-filter{
+  color: white;
+}
+
+/* Improve grid cell padding */
+.ag-cell {
+  padding-left: 12px !important;
+  padding-right: 12px !important;
+}
+
+/* =============================================================================
+   UTILITY CLASSES
+============================================================================= */
+
+/* Scrollbar styling for better UX */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-tertiary);
+}
+
+/* Focus visible for accessibility */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
