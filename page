@@ -1,6 +1,11 @@
-import React from 'react';
+import React, { type ReactNode } from 'react';
 
-const PageContainer = ({ title, children }) => {
+interface PageContainerProps {
+  title: string;
+  children: ReactNode;
+}
+
+const PageContainer: React.FC<PageContainerProps> = ({ title, children }) => {
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--color-bg-base)' }}>
       {/* Page Title Header */}
@@ -26,7 +31,7 @@ const PageContainer = ({ title, children }) => {
 };
 
 // Example usage with the performance dashboard
-const DashboardExample = () => {
+const DashboardExample: React.FC = () => {
   return (
     <PageContainer title="Unified Performance Dashboard">
       {/* Your content goes here */}
